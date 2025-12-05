@@ -1,0 +1,25 @@
+[package]
+name = "openevolve-play"
+version = "0.1.0"
+authors.workspace = true
+repository.workspace = true
+edition.workspace = true
+readme.workspace = true
+
+[dependencies]
+anyhow = "1.0.81"
+tig-algorithms = { path = "../tig-algorithms", features = [
+    "c001",
+    "c002",
+    "c003",
+] }
+tig-challenges = { path = "../tig-challenges", features = [
+    "c001",
+    "c002",
+    "c003",
+] }
+tig-utils = { path = "../tig-utils" }
+rand = { version = "0.8.5", default-features = false, features = [
+    "std_rng",
+    "small_rng",
+] }
