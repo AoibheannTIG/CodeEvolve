@@ -1,0 +1,14 @@
+[package]
+name = "c003-runner"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+anyhow = "1.0.81"
+clap = { version = "4.5.4" }
+rand = { version = "0.8.5", default-features = false, features = ["std_rng"] }
+serde = { version = "1.0.196", features = ["derive"] }
+serde_json = { version = "1.0.113" }
+tig-challenges = { git = "https://github.com/tig-foundation/tig-monorepo.git", branch = "blank_slate", features = [
+    "c003",
+] }

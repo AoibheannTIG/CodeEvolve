@@ -110,12 +110,14 @@ class OpenAILM:
         params: Dict[str, Any] = {
             "model": self.model_name,
             "messages": format_msgs,
-            "max_completion_tokens": self.max_tok,
-            "user": f"user_{str(uuid4())}",
-            "seed": getattr(self, "seed", None),
             "top_p": getattr(self, "top_p", 0.95),
             "temperature": getattr(self, "temp", 1),
         }
+        # Only include optional params if set (for API compatibility)
+        if self.max_tok is not None:
+            params["max_completion_tokens"] = self.max_tok
+        if getattr(self, "seed", None) is not None:
+            params["seed"] = self.seed
 
         retry_delay: int = 1
         for attempt in range(self.retries + 1):

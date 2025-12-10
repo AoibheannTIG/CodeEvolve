@@ -1,0 +1,70 @@
+SYS_MSG: |
+  SETTING:
+  You are an expert Rust programmer specializing in combinatorial optimization algorithms with deep expertise in knapsack problems, resource allocation algorithms, and constraint satisfaction.
+  Your mission is to evolve and optimize a quadratic knapsack algorithm that outputs the highest quality possible.
+
+  PROBLEM CONTEXT:
+  - Target: Beat the AlphaEvolve state-of-the-art result of avg_btb = 0.0015
+  - This is a QUADRATIC knapsack problem with interaction values between items
+  - Items have: weights, values, and interaction_values (2D matrix)
+  - Total value = sum of item values + sum of interaction values for pairs of selected items
+  - Constraint: total weight must not exceed max_weight which is half the weight of all items
+  - The "density" of the knapsack is 25% - meaning interaction values are 0 with probability 0.75
+
+  INPUT SPECIFICATION:
+  The challenge parameter provides access to the following fields:
+  - challenge.seed: [u8; 32] - Fixed-size array of 32 bytes for seeding RNGs
+  - challenge.weights: Vec<u32> - Vector of unsigned 32-bit integers (item weights)
+  - challenge.values: Vec<u32> - Vector of unsigned 32-bit integers (item base values)
+  - challenge.interaction_values: Vec<Vec<i32>> - 2D matrix of SIGNED 32-bit integers
+    * interaction_values[i][j] gives bonus value when items i and j are BOTH selected
+    * This matrix is symmetric: interaction_values[i][j] == interaction_values[j][i]
+    * Diagonal is zero: interaction_values[i][i] == 0
+  - challenge.max_weight: u32 - Maximum total weight allowed
+
+  OUTPUT SPECIFICATION:
+  Your code must create a variable named `selected` with type Vec<usize>:
+  - Contains indices of items to include in the knapsack solution
+  - Valid range: Each element must be in [0, n-1] where n = challenge.values.len()
+  - No duplicates: Each item index can appear at most once
+  - Weight constraint: Sum of weights for selected items must be <= max_weight
+
+  COMPUTATIONAL RESOURCES:
+  **Available crates**: anyhow, serde, serde_json, rand (SmallRng)
+  
+  **Random numbers**: Use SmallRng with challenge.seed:
+  ```rust
+  let mut rng = SmallRng::from_seed(challenge.seed);
+  ```
+
+  PERFORMANCE METRICS:
+  1. **avg_btb**: Average better-than-baseline percentage (PRIMARY OBJECTIVE - maximize)
+  2. **combined_score**: avg_btb/0.0015 (progress toward beating benchmark)
+  3. **eval_time**: Execution time in seconds
+  4. **memory**: Memory usage in kilobytes
+      
+CODEBASE_PATH: 'src/'
+INIT_FILE_DATA: {filename: 'init_program.rs', language: 'rust'}
+EVAL_FILE_NAME: 'evaluate.py'
+EVAL_TIMEOUT: 1200
+
+MAX_MEM_BYTES: 2000000000
+MEM_CHECK_INTERVAL_S: 0.1
+
+# No evolution baseline - single population, no meta-prompting, no inspirations
+EVOLVE_CONFIG: {fitness_key: 'combined_score',
+                num_epochs: 100, ckpt: 5, max_size: 150, init_pop: 6,
+                exploration_rate: 0.3, 
+                selection_policy: 'roulette', selection_kwargs: {roulette_by_rank: True},
+                early_stopping_rounds: 50,
+                num_islands: 1, migration_topology: 'ring', migration_interval: 100, migration_rate: 0.0,
+                meta_prompting: False, num_inspirations: 0,
+                max_chat_depth: 1,
+                evolve_start_marker: "// EVOLVE-BLOCK-START", evolve_end_marker: "// EVOLVE-BLOCK-END",
+                }
+
+# Using Gemini models via Google AI Studio OpenAI-compatible API
+ENSEMBLE: [{model_name: 'gemini-1.5-flash', temp: 0.4, top_p: 0.95, retries: 5, weight: 1.0, verify_ssl: True}]
+
+SAMPLER_AUX_LM: {model_name: 'gemini-1.5-flash', temp: 0.4, top_p: 0.95, retries: 5, weight: 1.0, verify_ssl: True}
+

@@ -1,0 +1,85 @@
+CODEBASE_PATH: src/
+ENSEMBLE:
+- model_name: gemini-pro-latest
+  retries: 5
+  temp: 0.7
+  top_p: 0.95
+  verify_ssl: true
+  weight: 1.0
+EVAL_FILE_NAME: evaluate.py
+EVAL_TIMEOUT: 1200
+EVOLVE_CONFIG:
+  ckpt: 5
+  early_stopping_rounds: 50
+  evolve_end_marker: // EVOLVE-BLOCK-END
+  evolve_start_marker: // EVOLVE-BLOCK-START
+  exploration_rate: 0.3
+  fitness_key: combined_score
+  init_pop: 6
+  max_chat_depth: 3
+  max_size: 150
+  meta_prompting: true
+  migration_interval: 10
+  migration_rate: 0.1
+  migration_topology: ring
+  mp_end_marker: '# PROMPT-BLOCK-END'
+  mp_start_marker: '# PROMPT-BLOCK-START'
+  num_epochs: 5
+  num_inspirations: 3
+  num_islands: 1
+  selection_kwargs:
+    roulette_by_rank: true
+  selection_policy: roulette
+INIT_FILE_DATA:
+  filename: init_program.rs
+  language: rust
+MAX_MEM_BYTES: 2000000000
+MEM_CHECK_INTERVAL_S: 0.1
+SAMPLER_AUX_LM:
+  model_name: gemini-pro-latest
+  retries: 5
+  temp: 0.7
+  top_p: 0.95
+  verify_ssl: true
+  weight: 1.0
+SYS_MSG: "SETTING:\nYou are an expert Rust programmer specializing in combinatorial\
+  \ optimization algorithms with deep expertise in knapsack problems, resource allocation\
+  \ algorithms, and constraint satisfaction.\nYour mission is to evolve and optimize\
+  \ a quadratic knapsack algorithm that outputs the highest quality possible.\n\n\
+  PROBLEM CONTEXT:\n- Target: Beat the AlphaEvolve state-of-the-art result of avg_btb\
+  \ = 0.0015\n- This is a QUADRATIC knapsack problem with interaction values between\
+  \ items\n- Items have: weights, values, and interaction_values (2D matrix)\n- Total\
+  \ value = sum of item values + sum of interaction values for pairs of selected items\n\
+  - Constraint: total weight must not exceed max_weight which is half the weight of\
+  \ all items\n- The \"density\" of the knapsack is 25% - meaning interaction values\
+  \ are 0 with probability 0.75\n\nINPUT SPECIFICATION:\nThe challenge parameter provides\
+  \ access to the following fields:\n- challenge.seed: [u8; 32] - Fixed-size array\
+  \ of 32 bytes for seeding RNGs\n- challenge.weights: Vec<u32> - Vector of unsigned\
+  \ 32-bit integers (item weights)\n- challenge.values: Vec<u32> - Vector of unsigned\
+  \ 32-bit integers (item base values)\n- challenge.interaction_values: Vec<Vec<i32>>\
+  \ - 2D matrix of SIGNED 32-bit integers\n  * interaction_values[i][j] gives bonus\
+  \ value when items i and j are BOTH selected\n  * This matrix is symmetric: interaction_values[i][j]\
+  \ == interaction_values[j][i]\n  * Diagonal is zero: interaction_values[i][i] ==\
+  \ 0\n- challenge.max_weight: u32 - Maximum total weight allowed\n\nOUTPUT SPECIFICATION:\n\
+  Your code must create a variable named `selected` with type Vec<usize>:\n- Contains\
+  \ indices of items to include in the knapsack solution\n- Valid range: Each element\
+  \ must be in [0, n-1] where n = challenge.values.len()\n- No duplicates: Each item\
+  \ index can appear at most once\n- Weight constraint: Sum of weights for selected\
+  \ items must be <= max_weight\n\nCOMPUTATIONAL RESOURCES:\n**Available crates**:\
+  \ anyhow, serde, serde_json, rand (SmallRng)\n\n**Random numbers**: Use SmallRng\
+  \ with challenge.seed:\n```rust\nlet mut rng = SmallRng::from_seed(challenge.seed);\n\
+  ```\n\nPERFORMANCE METRICS:\n1. **avg_btb**: Average better-than-baseline percentage\
+  \ (PRIMARY OBJECTIVE - maximize)\n2. **combined_score**: avg_btb/0.0015 (progress\
+  \ toward beating benchmark)\n3. **eval_time**: Execution time in seconds\n4. **memory**:\
+  \ Memory usage in kilobytes\n\n# PROMPT-BLOCK-START\n\nOPTIMIZATION STRATEGIES TO\
+  \ CONSIDER:\n- Local search with 2-opt or k-opt moves\n- Simulated annealing with\
+  \ adaptive cooling schedules\n- Genetic algorithms with specialized crossover operators\n\
+  - Tabu search to avoid cycling\n- Branch and bound with good upper bounds\n- Dynamic\
+  \ programming relaxations\n- Greedy construction with look-ahead\n\nMATHEMATICAL\
+  \ FOUNDATIONS:\n- The quadratic term makes this NP-hard\n- Interaction density of\
+  \ 25% suggests sparse structure to exploit\n- Consider linearization techniques\
+  \ or Lagrangian relaxation\n- Use incremental evaluation for swap moves\n\n**Recommended\
+  \ implementation patterns:**\n- Pre-compute interaction sums for efficient move\
+  \ evaluation\n- Use bit vectors for solution representation\n- Implement delta evaluation\
+  \ for O(n) swap checking\n- Consider multi-start strategies with diversity\n\n#\
+  \ PROMPT-BLOCK-END\n    \n"
